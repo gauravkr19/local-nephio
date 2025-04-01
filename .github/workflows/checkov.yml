@@ -20,3 +20,5 @@ jobs:
           skip_check: CKV_K8S_21,CKV_DOCKER_2
           output_format: github_failed_only
 
+
+
