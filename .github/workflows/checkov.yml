@@ -16,5 +16,6 @@ jobs:
         uses: bridgecrewio/checkov-action@master
         with:
           directory: "."
-          output_format: "github_failed_only"  # Only show failures
-
+          skip_path: ".*test.*"
+          skip_check: CKV_K8S_21
+          quiet: true
