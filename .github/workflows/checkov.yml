@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run Checkov Scan
-        uses: bridgecrewio/checkov-action@12
+        uses: bridgecrewio/checkov-action@master
         with:
           directory: "."
           skip_path: .*test.*
