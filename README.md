@@ -1,14 +1,6 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/nephio-project/nephio.svg)](https://pkg.go.dev/github.com/nephio-project/nephio)
 [![License](https://img.shields.io/github/license/nephio-project/nephio?color=blue)](https://github.com/nephio-project/nephio/blob/main/LICENSE)
 
-# Nephio
-
-The Nephio project is building a Kubernetes-based automation platform for
-deploying and managing highly distributed, interconnected workloads such as 5G
-Network Functions, and the underlying infrastructure on which those workloads
-depend.
-
-
 
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/nephio-project/nephio/badge)](https://securityscorecards.dev/viewer/?uri=github.com/nephio-project/nephio) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/7665/badge)](https://www.bestpractices.dev/projects/7665)
