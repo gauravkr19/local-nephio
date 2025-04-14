@@ -16,6 +16,8 @@ jobs:
 
       - name: Install Checkov
         run: pip install checkov
+      - name: Install jq
+        run: sudo apt-get install jq
 
       - name: Run Checkov Scan (JSON)
         run: |
