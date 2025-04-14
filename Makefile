@@ -12,9 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+
+
+
 .SHELLFLAGS = -ec
 
 GO_VERSION ?= 1.22.2
+
 IMG_REGISTRY ?= docker.io/nephio
 
 # find all subdirectories with a go.mod file in them

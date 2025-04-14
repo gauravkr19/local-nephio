@@ -27,6 +27,7 @@ jobs:
           checkov -d . --skip-path '.*test.*' --output json > checkov_raw.json
 
 
+
       - name: Post-process JSON Output with jq
         run: |
           jq 'map({
