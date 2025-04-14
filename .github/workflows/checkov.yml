@@ -24,9 +24,8 @@ jobs:
 
       - name: Run Checkov Scan (JSON)
         run: |
-          checkov -d . --output json > checkov_raw.json
-      - name: publish raw report
-        run: cat checkov_raw.json
+          checkov -d . --output json | tee checkov_raw.json
+
 
       - name: Post-process JSON Output with jq
         run: |
