@@ -70,11 +70,12 @@ jobs:
           name: checkov-report
           path: checkov_enriched.json
 
-      - name: Fail if HIGH/CRITICAL found
+      - name: Fail PR if High/Critical Checkov Findings Exist
         run: |
-          count=$(jq '[.[][] | .results.failed_checks[] | select(.severity == "HIGH" or .severity == "CRITICAL")] | length' checkov_enriched.json)
+          count=$(jq '[.[] | select(.results.failed_checks) | .results.failed_checks[] | select(.severity == "HIGH" or .severity == "CRITICAL")] | length' checkov_enriched.json)
           if [ "$count" -gt 0 ]; then
             echo "::error ::$count HIGH/CRITICAL checks failed."
             exit 1
           fi
+
 
