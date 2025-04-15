@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Checkov Scan (JSON)
         run: |
-          checkov -d . --skip-path '.*test.*' --output json > checkov_raw.json || true
+          checkov -d . --output json | tee checkov_raw.json
 
 
       - name: Post-process JSON Output with jq
@@ -72,7 +72,7 @@ jobs:
 
       - name: Fail PR if High/Critical Checkov Findings Exist
         run: |
-          count=$(jq '[.[] | select(.results.failed_checks) | .results.failed_checks[] | select(.severity == "LOW" or .severity == "CRITICAL")] | length' checkov_enriched.json)
+          count=$(jq '[.[] | select(.results.failed_checks) | .results.failed_checks[] | select(.severity == "HIGH" or .severity == "CRITICAL")] | length' checkov_enriched.json)
           if [ "$count" -gt 0 ]; then
             echo "::error ::$count HIGH/CRITICAL checks failed."
             exit 1
