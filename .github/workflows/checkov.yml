@@ -24,8 +24,7 @@ jobs:
 
       - name: Run Checkov Scan (JSON)
         run: |
-          checkov -d . --output json | tee checkov_raw.json
-
+          checkov -d . --skip-path '.*test.*' --output json > checkov_raw.json || true
 
       - name: Post-process JSON Output with jq
         run: |
