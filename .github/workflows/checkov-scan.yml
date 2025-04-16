@@ -44,12 +44,12 @@ jobs:
           go build -o enrich-severity main.go
 
       - name: Run Severity Enricher
-        run: ./enrich-severity -input checkov_raw_report.json -map .github/checkov/severity_map.json -output checkov_enriched.json
+        run: ./enrich-severity -input checkov_raw_report.json -map .github/checkov-scan/severity_map.json -output checkov_enriched.json
 
       ### Step 4: Use jq to generate filtered report
       - name: Generate Final Checkov Report using jq
         run: |
-          jq -f .github/checkov/summary_report.jq checkov_enriched.json | tee checkov_scan_report.json
+          jq -f .github/checkov-scan/summary_report.jq checkov_enriched.json | tee checkov_scan_report.json
 
       ### Step 5: Upload final scan report as artifact
       - name: Upload Scan Report
