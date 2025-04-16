@@ -17,14 +17,20 @@ jobs:
       - name: Checkout PR Code
         uses: actions/checkout@v3
 
-      ### Step 2: Run Checkov Scan using official action
-      - name: Run Checkov Scan
-        uses: bridgecrewio/checkov-action@v12
+      ### Step 2: Run Checkov Scan 
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          directory: "."
-          output_format: json
-          skip_path: ".*test.*"
-          output_file_path: checkov_raw_report.json
+          python-version: "3.11"
+
+      - name: Install Checkov
+        run: pip install checkov
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Run Checkov Scan (JSON)
+        run: |
+          checkov -d . --skip-path '.*test.*' --output json > checkov_raw_report.json || true 
 
       ### Step 3: Build and Run Go code to enrich severity
       - name: Set up Go
