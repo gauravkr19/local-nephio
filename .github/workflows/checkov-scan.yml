@@ -1,0 +1,60 @@
+name: Checkov Security Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      ### Step 1: Checkout Repo
+      - name: Checkout PR Code
+        uses: actions/checkout@v3
+
+      ### Step 2: Run Checkov Scan using official action
+      - name: Run Checkov Scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: "."
+          output_format: json
+          skip-path: ".*test.*"
+          output_file_path: checkov_raw_report.json
+
+      ### Step 3: Build and Run Go code to enrich severity
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Build Severity Enricher
+        run: go build -o enrich-severity .github/checkov/main.go
+
+      - name: Run Severity Enricher
+        run: ./enrich-severity -input checkov_raw_report.json -map .github/checkov/severity_map.json -output checkov_enriched.json
+
+      ### Step 4: Use jq to generate filtered report
+      - name: Generate Final Checkov Report using jq
+        run: |
+          jq -f .github/checkov/summary_report.jq checkov_enriched.json | tee checkov_scan_report.json
+
+      ### Step 5: Upload final scan report as artifact
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference_checkov_raw_report
+          path: checkov_raw_report.json
+
+      ### Step 6: Fail PR if High/Critical/Medium severity findings exist
+      - name: Fail PR if High/Critical/Medium Findings Exist
+        run: |
+          count=$(jq '[.[] | select(.results.failed_checks) | .results.failed_checks[] | select(.severity == "MEDIUM" or .severity == "HIGH" or .severity == "CRITICAL")] | length' checkov_enriched.json)
+          if [ "$count" -gt 0 ]; then
+            echo "::error ::$count HIGH/MEDIUM/CRITICAL findings detected."
+            exit 1
+          fi
