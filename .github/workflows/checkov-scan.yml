@@ -23,7 +23,7 @@ jobs:
         with:
           directory: "."
           output_format: json
-          skip-path: ".*test.*"
+          skip_path: ".*test.*"
           output_file_path: checkov_raw_report.json
 
       ### Step 3: Build and Run Go code to enrich severity
