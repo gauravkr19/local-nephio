@@ -40,7 +40,7 @@ jobs:
 
       - name: Build Severity Enricher
         run: | 
-          cd .github/checkov
+          cd .github/checkov-scan
           go build -o enrich-severity main.go
 
       - name: Run Severity Enricher
