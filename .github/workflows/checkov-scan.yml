@@ -36,10 +36,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.23'
+          go-version: '1.24'
 
       - name: Build Severity Enricher
-        run: go build -o enrich-severity .github/checkov/main.go
+        run: | 
+          cd .github/checkov
+          go build -o enrich-severity main.go
 
       - name: Run Severity Enricher
         run: ./enrich-severity -input checkov_raw_report.json -map .github/checkov/severity_map.json -output checkov_enriched.json
