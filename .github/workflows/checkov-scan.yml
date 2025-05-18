@@ -2,63 +2,87 @@ name: Checkov Security Scan
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  security_scan:
+  # Job 1: Internal setup and processing
+  internal-setup:
+    name: Internal Setup & Checkov Enrichment
     runs-on: ubuntu-latest
+    outputs:
+      enriched-report: ${{ steps.set-output.outputs.enriched }}
 
     steps:
-      ### Step 1: Checkout Repo
       - name: Checkout PR Code
         uses: actions/checkout@v3
 
-      ### Step 2: Run Checkov Scan 
+      - name: Set up Environment
+        run: |
+          sudo apt-get install -y jq
+          pip install checkov
+        shell: bash
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install Checkov
-        run: pip install checkov
-      - name: Install jq
-        run: sudo apt-get install jq
-
-      - name: Run Checkov Scan (JSON)
-        run: |
-          checkov -d . --skip-path '.*test.*' --output json > checkov_raw_report.json || true 
-
-      ### Step 3: Build and Run Go code to enrich severity
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.24'
 
-      - name: Build Severity Enricher
-        run: | 
+      - name: Run Checkov
+        run: |
+          checkov -d . --skip-path '.*test.*' --output json > checkov_raw_report.json || true
+
+      - name: Build Go Enricher
+        run: |
           cd .github/checkov-scan
           go build -o enrich-severity main.go
 
-      - name: Run Severity Enricher
-        run: ./.github/checkov-scan/enrich-severity -input checkov_raw_report.json -map .github/checkov-scan/severity_map.json -output checkov_enriched.json
+      - name: Run Enricher
+        run: |
+          ./.github/checkov-scan/enrich-severity \
+            -input checkov_raw_report.json \
+            -map .github/checkov-scan/severity_map.json \
+            -output checkov_enriched.json
 
-      ### Step 4: Use jq to generate filtered report
+      - name: Upload enriched report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov_enriched
+          path: checkov_enriched.json
+
+      - name: Upload raw Checkov report
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov_raw
+          path: checkov_raw_report.json
+
+      - name: Set output (dummy for dependency)
+        id: set-output
+        run: echo "enriched=true" >> $GITHUB_OUTPUT
+
+  # Job 2: Public-facing filtered report and gatekeeping
+  public-facing-scan:
+    name: Public Checkov Summary & PR Gate
+    needs: internal-setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download enriched report
+        uses: actions/download-artifact@v4
+        with:
+          name: checkov_enriched
+          path: .
+
       - name: Generate Final Checkov Report using jq
         run: |
           jq -f .github/checkov-scan/summary_report.jq checkov_enriched.json | tee checkov_scan_report.json
 
-      ### Step 5: Upload final scan report as artifact
-      - name: Upload Scan Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: reference_checkov_raw_report
-          path: checkov_raw_report.json
-
-      ### Step 6: Fail PR if High/Critical/Medium severity findings exist
       - name: Fail PR if High/Critical/Medium Findings Exist
         run: |
           count=$(jq '[.[] | select(.results.failed_checks) | .results.failed_checks[] | select(.severity == "MEDIUM" or .severity == "HIGH" or .severity == "CRITICAL")] | length' checkov_enriched.json)
