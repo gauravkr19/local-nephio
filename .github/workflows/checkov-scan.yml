@@ -29,8 +29,11 @@ jobs:
         run: sudo apt-get install jq
 
       - name: _Run Checkov Scan (JSON)
+        working-directory: ${{ github.workspace }}
         run: |
-          checkov -d . --skip-path '.*test.*' --output json > checkov_raw_report.json || true 
+          echo "PWD: $(pwd)"
+          find . -type f | grep -i test || echo "No test files found"
+            checkov -d . --skip-path '.*test.*' --output json > checkov_raw_report.json || true 
 
       ### Step 3: Build and Run Go code to enrich severity
       - name: _Set up Go
