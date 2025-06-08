@@ -13,26 +13,19 @@ jobs:
       - name: Checkout PR Code
         uses: actions/checkout@v3
 
-      - name: Extract Repo Name as Variable
-        id: extract_repo
-        run: echo "REPO_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
-
       - name: Show Files for Debug
         run: |
-          echo "Repo name: $REPO_NAME"
           echo "### Current Working Directory"
           pwd
-          
-          echo "### Top-level ls"
-          ls -al          
-          echo "---"
           find . | grep .github
+          echo "### TEST path  Directory"
+          find . | grep test || echo "No test paths found"
 
       - name: Run Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: "${{ env.REPO_NAME }}"
+          directory: "."
           output_format: "github_failed_only"
-          skip_path: ".*test.*"
+          skip_path: "^\.\/.*test.*"
 
-#  skip_path: "^${{ env.REPO_NAME }}/.*test.*$|^${{ env.REPO_NAME }}/\\.github.*$"
+#   skip_path: "^\.\/(\.github|.*test.*)"  # key fix
