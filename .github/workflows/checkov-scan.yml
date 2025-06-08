@@ -1,9 +1,16 @@
 name: Checkov Security Scan
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      user_verdict:
+        description: "Mark this run as PASS or FAIL after reviewing scan"
+        required: true
+        default: "PASS"
+        type: choice
+        options:
+          - PASS
+          - FAIL
 
 jobs:
   security_scan:
@@ -20,3 +27,13 @@ jobs:
           soft_fail: true     
           output_format: "github_failed_only"
           skip_path: '^\.\/.*test.*,^\.\/\.github.*'
+
+      - name: User decision gate
+        run: |
+          echo "User verdict: ${{ github.event.inputs.user_verdict }}"
+          if [[ "${{ github.event.inputs.user_verdict }}" == "FAIL" ]]; then
+            echo "Failing the job as per user input."
+            exit 1
+          else
+            echo "Passing the job as per user input."
+          fi
