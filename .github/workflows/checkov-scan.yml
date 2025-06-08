@@ -15,6 +15,6 @@ jobs:
       - name: Run Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: "."
-          output_format: "github_failed_only"
+          directory: "."          
           skip_path: ".*test.*"
+          output_format: "github_failed_only"
