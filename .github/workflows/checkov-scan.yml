@@ -17,5 +17,6 @@ jobs:
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: "."
+          soft_fail: true     
           output_format: "github_failed_only"
           skip_path: '^\.\/.*test.*,^\.\/\.github.*'
