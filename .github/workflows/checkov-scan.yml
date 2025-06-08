@@ -26,6 +26,4 @@ jobs:
         with:
           directory: "."
           output_format: "github_failed_only"
-          skip_path: "^\.\/.*test.*"
-
-#   skip_path: "^\.\/(\.github|.*test.*)"  # key fix
+          skip_path: '^\.\/.*test.*'
