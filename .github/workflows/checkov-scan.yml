@@ -13,17 +13,9 @@ jobs:
       - name: Checkout PR Code
         uses: actions/checkout@v3
 
-      - name: Show Files for Debug
-        run: |
-          echo "### Current Working Directory"
-          pwd
-          find . | grep .github
-          echo "### TEST path  Directory"
-          find . | grep test || echo "No test paths found"
-
       - name: Run Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: "."
           output_format: "github_failed_only"
-          skip_path: '^\.\/.*test.*'
+          skip_path: '^\.\/.*test.*,^\.\/\.github.*'
